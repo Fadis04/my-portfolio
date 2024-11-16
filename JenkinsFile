@@ -1,0 +1,110 @@
+pipeline {
+    agent {
+        label 'jenkins-agent'
+    }
+    tools {
+        nodejs 'node'
+    }
+    environment {
+        APP_NAME = "my-portfolio"
+        RELEASE = "1.0.0"
+        DOCKER_USER = "13646891"
+        DOCKER_PASS = "dockerhub"
+        IMAGE_NAME = "${DOCKER_USER}" + "/" + "${APP_NAME}"
+        IMAGE_TAG = "${RELEASE}-${BUILD_NUMBER}"
+    }
+
+    stages {
+        stage('Cleanup Workspace') {
+            steps {
+                cleanWs()
+            }
+        }
+
+        stage('Checkout') {
+            steps {
+                checkout([
+                    $class: 'GitSCM',
+                    branches: [[name: '*/master']],
+                    userRemoteConfigs: [[url: 'https://github.com/hamzasdiri/My-Portfolio']]
+                ])
+            }
+        }
+
+        stage('Install Dependencies') {
+            steps {
+                bat 'npm install'
+            }
+        }
+        
+        stage('Build') {
+            steps {
+                bat 'npm run build'
+            }
+        }
+        
+        stage('Test') {
+            steps {
+                echo "No tests yet"
+            }
+        }
+
+        stage('Sonarqube analysis') {
+            steps {
+                script {
+                    withSonarQubeEnv(credentialsId: 'jenkins-sonarqube-token') {
+                        bat "sonar-scanner" 
+                    }
+                }
+            }
+        }
+
+        stage('Quality Gate') {
+            steps {
+                script {
+                    waitForQualityGate abortPipeline: false,credentialsId: 'jenkins-sonarqube-token'
+                }
+            }
+        }
+
+        stage('Build & Push Docker Image') {
+            steps {
+                script {
+                    docker.withRegistry('',DOCKER_PASS) {
+                    docker_image = docker.build("${IMAGE_NAME}", "-f DockerFile .")
+                    }
+                    docker.withRegistry('',DOCKER_PASS) {
+                    docker_image.push("${IMAGE_TAG}")
+                    docker_image.push("latest")
+                    }
+                }
+            }
+        }
+
+        stage('Deploy to Firebase') {
+    steps {
+        script {
+            withCredentials([file(credentialsId: 'firebase-credentials', variable: 'FIREBASE_CREDENTIALS_JSON'),
+                            string(credentialsId: 'firebase-token', variable: 'FIREBASE_TOKEN')]) {
+                // Write the credentials to a file
+                writeFile file: 'firebase-credentials.json', text: FIREBASE_CREDENTIALS_JSON
+
+                // Install Firebase CLI
+                bat 'npm install -g firebase-tools'
+
+                // Set the GOOGLE_APPLICATION_CREDENTIALS environment variable
+                env.GOOGLE_APPLICATION_CREDENTIALS = 'firebase-credentials.json'
+
+                // Deploy to Firebase using the authentication token
+                bat 'firebase deploy --project my-protfolio-99553'
+            }
+        }
+    }
+}
+
+
+
+
+
+    }
+}
