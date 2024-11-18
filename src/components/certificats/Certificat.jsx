@@ -1,6 +1,6 @@
 import React from "react";
 import "./certificat.css";
-import img1 from "../../assets/fadiDiplome.jpg";
+import img1 from "../../assets/fadiDiplome.png";
 import img2 from "../../assets/Attestation chef de projet.jpg";
 import img3 from "../../assets/Attestation encadrant.jpg";
 
