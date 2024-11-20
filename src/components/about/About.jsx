@@ -9,14 +9,14 @@ const About = () => {
   const [section, setSection] = useState("experience");
   const [job, setJob] = useState("LBBE");
   const IPT_tasks = [
-    "Characterization of Alternative splicing variants based on NGS data",
-    "Quantification and differential analysis of splicing variants",
-    "Annotation of AS Variants linked to the sterility observed in F1 hybrid Flycatchers"
-  ];
-  const IPT_tasks1 = [
     "Identification of rare genetic diseases in Tunisia",
     "Analysis of high-throughput sequencing data via the Galaxy pipeline",
     "Analysis of DNA chip genotyping data using the PLINK tool and SNP annotation via VEP to assess functional impact",
+  ];
+  const IPT_tasks1 = [
+    "Characterization of Alternative splicing variants based on NGS data",
+    "Quantification and differential analysis of splicing variants",
+    "Annotation of AS Variants linked to the sterility observed in F1 hybrid Flycatchers"
   ];
   const IPT_tasks2 = [
     "Research on viruses and bacteria of economic and medical importance, including isolation, characterization, typing, pathogenicity, prevention, and modeling",
